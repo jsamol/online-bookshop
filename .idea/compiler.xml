@@ -12,9 +12,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="online-bookshop" target="1.5" />
-      <module name="virtual-bookshop" target="1.5" />
-      <module name="virtual-library" target="1.5" />
+      <module name="online-bookshop" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
