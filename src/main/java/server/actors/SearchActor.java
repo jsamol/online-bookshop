@@ -25,13 +25,8 @@ public class SearchActor extends AbstractActor {
                 .build();
     }
 
-    private String search(String title) {
+    private String search(String title) throws FileNotFoundException, ExecutionException, InterruptedException {
         int n = Server.getDbs().length;
-        try {
-            return new Searcher(title, n).search();
-        } catch (FileNotFoundException | ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return new Searcher(title, n).search();
     }
 }

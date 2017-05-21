@@ -10,6 +10,7 @@ import server.actors.Manager;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -17,8 +18,9 @@ public class Server {
     private static final String[] dbs = {"booksDB1.txt", "booksDB2.txt"};
     private static final String ordersFileName = "orders.txt";
     private static final String dbPath = "files/db/";
-    private static final String ordersPath = "files/";
+    private static final String filesPath = "files/";
     private static final String booksPath = "files/books/";
+    private static final String loremFileName = "lorem_ipsum.txt";
 
     private final int allBooks = 1000;
     private final String currency = "PLN";
@@ -65,7 +67,7 @@ public class Server {
     }
 
     public static void main(String[] args) {
-        Server server = new Server(true);
+        Server server = new Server(false);
         server.start();
     }
 
@@ -75,15 +77,19 @@ public class Server {
         for (int i = 0; i < allBooks; i++) {
             String name = "Book #" + i;
             try {
+                Path lorem = Paths.get(filesPath + loremFileName);
+                Scanner scanner = new Scanner(lorem);
                 PrintWriter file = new PrintWriter(booksPath + name + ".txt", "UTF-8");
-                for (int j = 0; j < random.nextInt(1500) + 500; j++) {
-                    file.print(name + " content. ");
+                for (int j = 0; j < random.nextInt(2) + 1 && scanner.hasNextLine(); j++) {
+                    file.println(scanner.nextLine());
                 }
                 file.close();
                 float price = (random.nextFloat() * 90) + 10;
                 String entry = String.format("%s | %.2f %s", name, price, currency);
                 entries.add(entry);
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -126,8 +132,11 @@ public class Server {
         return dbPath;
     }
 
-    public static String getOrdersPath() {
-        return ordersPath;
+    public static String getFilesPath() {
+        return filesPath;
     }
 
+    public static String getBooksPath() {
+        return booksPath;
+    }
 }

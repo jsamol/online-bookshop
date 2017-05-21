@@ -30,26 +30,21 @@ public class OrderActor extends AbstractActor {
                 .build();
     }
 
-    private String order(String title) {
-        try {
-            String searchResult = new Searcher(title, Server.getDbs().length).search();
-            if ((title + " has not been found.").equals(searchResult)) {
-                return "failure (" + searchResult + ")";
-            }
-            Path ordersFile = Paths.get(Server.getOrdersPath() + Server.getOrdersFileName());
-            StandardOpenOption openOption;
-            if (Files.exists(ordersFile)) {
-                openOption = StandardOpenOption.APPEND;
-            }
-            else {
-                openOption = StandardOpenOption.CREATE;
-            }
-            synchronized (this) {
-                Files.write(ordersFile, (title + "\n").getBytes(), openOption);
-            }
-        } catch (ExecutionException | IOException | InterruptedException e) {
-            e.printStackTrace();
-            return "failure";
+    private String order(String title) throws IOException, ExecutionException, InterruptedException {
+        String searchResult = new Searcher(title, Server.getDbs().length).search();
+        if ((title + " has not been found.").equals(searchResult)) {
+            return "failure (" + searchResult + ")";
+        }
+        Path ordersFile = Paths.get(Server.getFilesPath() + Server.getOrdersFileName());
+        StandardOpenOption openOption;
+        if (Files.exists(ordersFile)) {
+            openOption = StandardOpenOption.APPEND;
+        }
+        else {
+            openOption = StandardOpenOption.CREATE;
+        }
+        synchronized (this) {
+            Files.write(ordersFile, (title + "\n").getBytes(), openOption);
         }
         return "success";
     }

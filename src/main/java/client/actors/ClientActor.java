@@ -14,6 +14,8 @@ public class ClientActor extends AbstractActor {
                 .match(ByteString.class, byteString -> {
                     String message = byteString.decodeString("UTF-8");
                     System.out.println(message);
+                    System.out.print("> ");
+                    System.out.flush();
                 })
                 .match(String.class, string -> {
                     getContext().actorSelection("akka.tcp://server@127.0.0.1:2552/user/manager")

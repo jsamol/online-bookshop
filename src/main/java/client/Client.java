@@ -38,7 +38,7 @@ public class Client {
                 if ("exit".equals(command)) {
                     break;
                 }
-                else {
+                else if (command.startsWith("find") || command.startsWith("order") || command.startsWith("read")) {
                     clientActor.tell(command, null);
                 }
             } catch (IOException e) {
