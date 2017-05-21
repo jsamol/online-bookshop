@@ -16,9 +16,8 @@ public class ClientActor extends AbstractActor {
                     System.out.println(message);
                 })
                 .match(String.class, string -> {
-                    ByteString message = ByteString.fromString(string);
                     getContext().actorSelection("akka.tcp://server@127.0.0.1:2552/user/manager")
-                            .tell(message, getSelf());
+                            .tell(ByteString.fromString(string), getSelf());
                 })
                 .matchAny(o -> log.info("Received unknown message."))
                 .build();

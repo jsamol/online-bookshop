@@ -6,13 +6,13 @@ import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.util.ByteString;
+import server.utilities.LocalMessage;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Manager extends AbstractActor {
     private final Map<String, String> roles;
-    private Map<String, ActorRef> senders;
     private LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
     public static Props props(Map<String, String> roles) {
@@ -22,8 +22,6 @@ public class Manager extends AbstractActor {
     private Manager(Map<String, String> roles) {
         this.roles = new HashMap<>();
         this.roles.putAll(roles);
-
-        senders = new HashMap<>();
     }
 
     @Override
@@ -31,22 +29,15 @@ public class Manager extends AbstractActor {
         return receiveBuilder()
                 .match(ByteString.class, byteString -> {
                     String message = byteString.decodeString("UTF-8");
-                    log.info("Received message \"" + message + "\" from " + getSender().toString());
+                    log.info("Received message \"" + message + "\" from " + getSender());
                     String[] messageAsArray = message.split(" ", 2);
-                    senders.put(getSender().toString(), getSender());
                     if (roles.containsKey(messageAsArray[0])) {
                         context().child(roles.get(messageAsArray[0]))
-                                .get().tell(messageAsArray[1] + "/@@@" + getSender().toString(), getSelf());
+                                .get().tell(new LocalMessage(messageAsArray[1], getSender()), getSelf());
                     }
                     else {
                         log.info("Received unknown message.");
                     }
-                })
-                .match(String.class, string -> {
-                    String[] stringAsArray = string.split("/@@@");
-                    ByteString message = ByteString.fromString(stringAsArray[1]);
-                    if (senders.containsKey(stringAsArray[0]))
-                    senders.get(stringAsArray[0]).tell(message, getSelf());
                 })
                 .matchAny(o -> log.info("Received unknown message."))
                 .build();

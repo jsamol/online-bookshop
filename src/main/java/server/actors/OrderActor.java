@@ -3,7 +3,9 @@ package server.actors;
 import akka.actor.AbstractActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import akka.util.ByteString;
 import server.Server;
+import server.utilities.LocalMessage;
 import server.workers.Searcher;
 
 import java.io.IOException;
@@ -19,12 +21,10 @@ public class OrderActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(String.class, string -> {
-                    String[] stringAsArray = string.split("/@@@");
-                    System.out.println(this);
-                    String returnMessage = "Order [" + stringAsArray[0] + "] status: ";
-                    returnMessage += order(stringAsArray[0]);
-                    getSender().tell(stringAsArray[1] + "/@@@" + returnMessage, getSelf());
+                .match(LocalMessage.class, localMessage -> {
+                    String returnMessage = "Order [" + localMessage.getMessage() + "] status: ";
+                    returnMessage += order(localMessage.getMessage());
+                    localMessage.getActorRef().tell(ByteString.fromString(returnMessage), getSelf());
                 })
                 .matchAny(o -> log.info("Received unknown message."))
                 .build();
