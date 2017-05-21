@@ -50,7 +50,8 @@ public class Server {
             try {
                 String command = input.readLine();
                 if ("\\exit".equals(command)) {
-                    break;
+                    actorSystem.terminate();
+                    System.exit(0);
                 }
                 else {
                     ByteString bs = ByteString.fromString(command);
@@ -61,7 +62,6 @@ public class Server {
             }
         }
 
-        actorSystem.terminate();
     }
 
     public static void main(String[] args) {
@@ -118,11 +118,16 @@ public class Server {
         return dbs;
     }
 
+    public static String getOrdersFileName() {
+        return ordersFileName;
+    }
+
+    public static String getDbPath() {
+        return dbPath;
+    }
+
     public static String getOrdersPath() {
         return ordersPath;
     }
 
-    public static String getOrdersFileName() {
-        return ordersFileName;
-    }
 }

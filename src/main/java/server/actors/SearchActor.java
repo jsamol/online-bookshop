@@ -4,7 +4,10 @@ import akka.actor.AbstractActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import server.Server;
+import server.workers.Searcher;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -15,8 +18,9 @@ public class SearchActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(String.class, string -> {
-                    String searchResult = search(string);
-                    getSender().tell(searchResult, getSelf());
+                    String[] stringAsArray = string.split("/@@@");
+                    String searchResult = search(stringAsArray[0]);
+                    getSender().tell(stringAsArray[1] + "/@@@" + searchResult, getSelf());
                 })
                 .matchAny(o -> log.info("Received unknown message."))
                 .build();
@@ -24,39 +28,15 @@ public class SearchActor extends AbstractActor {
 
     private String search(String title) {
         int n = Server.getDbs().length;
-        ExecutorService executorService = Executors.newFixedThreadPool(n);
-        List<CompletableFuture<String>> completableFutures = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            CompletableFuture<String> completableFuture = new CompletableFuture<>();
-            executorService.submit(() -> {
-                // TODO: do search
-                String result = "";
-                completableFuture.complete(result);
-            });
-            completableFutures.add(completableFuture);
+        try {
+            return new Searcher(title, n).search();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        Set<String> searchResults = new HashSet<>();
-        for (CompletableFuture<String> completableFuture : completableFutures) {
-            try {
-                searchResults.add(completableFuture.get());
-            } catch (InterruptedException e) {
-
-            } catch (ExecutionException e) {
-
-            } // TODO: handle exceptions
-        }
-
-        if (searchResults.size() > 1) {
-            for (String searchResult : searchResults) {
-                if (searchResult.startsWith(title)) {
-                    return searchResult;
-                }
-            }
-        }
-        else {
-            return searchResults.iterator().next();
-        }
-
         return null;
     }
 }

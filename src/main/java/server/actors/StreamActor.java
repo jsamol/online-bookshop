@@ -11,7 +11,8 @@ public class StreamActor extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(String.class, string -> {
-
+                    String[] stringAsArray = string.split("/@@@");
+                    getSender().tell(stringAsArray[1] + "/@@@" + stringAsArray[0], getSelf());
                 })
                 .matchAny(o -> log.info("Received unknown message."))
                 .build();
